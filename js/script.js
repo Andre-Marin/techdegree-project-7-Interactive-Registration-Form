@@ -121,37 +121,54 @@ paymentForm.addEventListener('change', e => {
 //Form Validation event listener
 form.addEventListener('submit', e => {
   e.preventDefault();
+
 //Helper functions for form Validation
+
+  function inputHints(elementField, valid, isParent) {
+    if (valid) {
+      if (isParent === 'true') {
+        elementField.className += ' valid';
+        elementField.classList.remove('not-valid');
+        elementField.lastElementChild.style.display = '';
+      } else {
+        elementField.parentNode.className = 'valid';
+        elementField.classList.remove('not-valid');
+        elementField.parentNode.lastElementChild.style.display = '';
+      }
+    } else if (!valid) {
+      if (isParent === 'true') {
+        elementField.className += ' not-valid';
+        elementField.classList.remove('valid');
+        elementField.lastElementChild.style.display = 'block';
+      } else {
+        elementField.parentNode.className = 'not-valid';
+        elementField.classList.remove('valid');
+        elementField.parentNode.lastElementChild.style.display = 'block';
+      }
+    }
+  }
+
   function notEmpty(elementID) {
     let input = document.querySelector(elementID).value;
     let inputField = document.querySelector(elementID);
+    let notEmpty = false;
     if (input) {
-      inputField.parentNode.className = 'valid';
-      inputField.parentNode.lastElementChild.style.display = '';
+      inputHints(inputField, true);
       return true;
     } else {
-      inputField.parentNode.className = 'not-valid';
-      inputField.parentNode.lastElementChild.style.display = 'block';
+      inputHints(inputField, false);
       return false;
     }
   }
 
   function validEmail(email) {
-    let isValid = false;
-    if (notEmpty(email)) {
-      let emailRegEx = /^\w{1,}@\w{1,}[.]com$/i;
-      let input = document.querySelector(email).value;
-      let inputField = document.querySelector(email);
-      let valid = emailRegEx.test(input);
-      if (valid) {
-        inputField.parentNode.className = 'valid';
-        inputField.parentNode.lastElementChild.style.display = '';
-        isValid = true;
-      } else if (!valid) {
-        inputField.parentNode.className = 'not-valid';
-        inputField.parentNode.lastElementChild.style.display = 'block';
-        isValid = false;
-      }
+    let emailRegEx = /^\w{1,}@\w{1,}[.]com$/i;
+    let input = document.querySelector(email).value;
+    let inputField = document.querySelector(email);
+    let isValid = emailRegEx.test(input);
+
+    if(notEmpty(email)) {
+      inputHints(inputField, isValid);
     }
     return isValid;
   }
@@ -165,15 +182,7 @@ form.addEventListener('submit', e => {
         isValid = true;
       }
     }
-    if (!isValid) {
-      activityField.className += ' not-valid';
-      activityField.classList.remove('valid');
-      activityField.lastElementChild.style.display = 'block';
-    } else {
-      activityField.className += ' valid';
-      activityField.classList.remove('not-valid');
-      activityField.lastElementChild.style.display = '';
-    }
+    inputHints(activityField, isValid, 'true');
     return isValid;
   }
 
@@ -182,45 +191,67 @@ form.addEventListener('submit', e => {
     let cardRegEx = /^\d{13,16}$/;
     let zipCodeRegEx = /^\d{5}$/;
     let cvvRegEx =  /^\d{3}$/;
+    const cc = document.querySelector('#cc-num');
+    const zip = document.querySelector('#zip');
+    const cvv = document.querySelector('#cvv');
+    let validPayment = false;
 
     let validInput = (regEx, inputId) => {
       let field = document.querySelector(inputId).value;
       let isValid = false;
       if (regEx.test(field)) {
         isValid = true;
-      }
-      return isValid;
+      } return isValid;
     };
 
-    if (validInput(cardRegEx, '#cc-num') &&
-        validInput(zipCodeRegEx, '#zip') &&
-        validInput(cvvRegEx, '#cvv')) {
-          return true;
-        } else {
-          return false;
-        }
+    let ccValid = validInput(cardRegEx, '#cc-num');
+    let zipValid = validInput(zipCodeRegEx, '#zip');
+    let cvvValid = validInput(cvvRegEx, '#cvv');
+
+    function validInputs(field, valid) {
+      if (valid) {
+        inputHints(field, true);
+      } else {
+        inputHints(field, false);
+      }
+    }
+  //   if (notEmpty(cc)) {}
+  //
+  //   if (ccValid && zipValid && cvvValid) {
+  //     inputHints(cc, true);
+  //     inputHints(zip, true);
+  //     inputHints(cvv, true);
+  //     validPayment = true;
+  //   } else if (!ccValid || !zipValid || !cvvValid) {
+  //     validInputs()
+  //   }
+  //   return validPayment;
   }
 
   //Actual form validation
   let nameValid = notEmpty('#name');
   let emailValid = validEmail('#email');
   let userRegistered = registered();
-  let validPayment = validCreditCard();
+  // let validPayment = validCreditCard();
 
 //Run if all input fields are satisfied submit form
 
-  if (nameValid &&
-      emailValid &&
-      userRegistered &&
-      validPayment) {
-        //Submit Form
-      } else if (!nameValid) {
+// else if (!ccValid) {
+//  inputHints(cc, false);
+// } else if (!zipValid) {
+//  inputHints(zip, false);
+// } else if (!cvvValid) {
+//  inputHints(cvv, false);
+// }
 
-      } else if (!emailValid) {
 
-      } else if (!userRegistered) {
+  // if (nameValid &&
+  //     emailValid &&
+  //     userRegistered &&
+  //     validPayment) {
+  //       //Submit Form
+  //     }
 
-      }
 
   // if (paymentType[1].selected) {
   //   if (!validPayment) {
