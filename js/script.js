@@ -31,6 +31,8 @@ const form = document.querySelector('form');
 // EVENT LISTENERS //
 */
 
+//Listen for job select 'Other'
+// Input box displayed or hidden based off selection
 jobInput.addEventListener('change', e => {
   const jobSelect = document.querySelectorAll('#title option');
   const job = e.target.value;
@@ -96,7 +98,7 @@ for (let checkbox of activityCheckboxes) {
   });
 }
 
-// Displays only the required forms and information for the user's selected payment type
+// Adjusts displayed inputs based of user payment selection.
 paymentForm.addEventListener('change', e => {
   const input = e.target.value;
   const bitcoinPayment = document.querySelector('#bitcoin');
@@ -120,10 +122,13 @@ paymentForm.addEventListener('change', e => {
 
 //Form Validation event listener
 form.addEventListener('submit', e => {
-  e.preventDefault();
 
 //Helper functions for form Validation
 
+//Shows or hides error MESSAGES for input fields
+//ElementField is the input
+//valid is meant to be a boolean value - can be set directly
+//isParent adjusts how the DOM is traversed - if element is parent then parentNode is not used.
   function inputHints(elementField, valid, isParent) {
     if (valid) {
       if (isParent === 'true') {
@@ -148,6 +153,7 @@ form.addEventListener('submit', e => {
     }
   }
 
+//Gets input field values and returns false if blank.
   function notEmpty(elementID) {
     let input = document.querySelector(elementID).value;
     let inputField = document.querySelector(elementID);
@@ -173,6 +179,8 @@ form.addEventListener('submit', e => {
     return isValid;
   }
 
+//Loop through all available activities and scans for checked activityCheckboxes
+//If checked boxes is > 1. The function returns true
   function registered() {
     let activities = document.querySelectorAll('#activities input');
     let activityField = document.getElementsByClassName('activities')[0];
@@ -186,7 +194,6 @@ form.addEventListener('submit', e => {
     return isValid;
   }
 
-//STILL NEED TO CREATE ERROR MESSAGES AND ATTATCH CLASS NAMES TO INVALID FIELDS
   function validCreditCard() {
     let cardRegEx = /^\d{13,16}$/;
     let zipCodeRegEx = /^\d{5}$/;
@@ -198,67 +205,38 @@ form.addEventListener('submit', e => {
 
     let validInput = (regEx, inputId) => {
       let field = document.querySelector(inputId).value;
-      let isValid = false;
-      if (regEx.test(field)) {
-        isValid = true;
-      } return isValid;
+      let inputField = document.querySelector(inputId);
+      let isValid = regEx.test(field);
+      if (notEmpty(inputId)) {
+        inputHints(inputField, isValid);
+      }
+      return isValid;
     };
 
     let ccValid = validInput(cardRegEx, '#cc-num');
     let zipValid = validInput(zipCodeRegEx, '#zip');
     let cvvValid = validInput(cvvRegEx, '#cvv');
 
-    function validInputs(field, valid) {
-      if (valid) {
-        inputHints(field, true);
-      } else {
-        inputHints(field, false);
-      }
+    if (ccValid && zipValid && cvvValid) {
+      validPayment = true;
     }
-  //   if (notEmpty(cc)) {}
-  //
-  //   if (ccValid && zipValid && cvvValid) {
-  //     inputHints(cc, true);
-  //     inputHints(zip, true);
-  //     inputHints(cvv, true);
-  //     validPayment = true;
-  //   } else if (!ccValid || !zipValid || !cvvValid) {
-  //     validInputs()
-  //   }
-  //   return validPayment;
+    return validPayment;
   }
 
-  //Actual form validation
+  //Validating form using all the helper functions preventing submit if one of the required inputs is not satisfied.
   let nameValid = notEmpty('#name');
   let emailValid = validEmail('#email');
   let userRegistered = registered();
-  // let validPayment = validCreditCard();
 
-//Run if all input fields are satisfied submit form
+  if (!nameValid || !emailValid || !userRegistered) {
+    e.preventDefault();
+  }
 
-// else if (!ccValid) {
-//  inputHints(cc, false);
-// } else if (!zipValid) {
-//  inputHints(zip, false);
-// } else if (!cvvValid) {
-//  inputHints(cvv, false);
-// }
-
-
-  // if (nameValid &&
-  //     emailValid &&
-  //     userRegistered &&
-  //     validPayment) {
-  //       //Submit Form
-  //     }
-
-
-  // if (paymentType[1].selected) {
-  //   if (!validPayment) {
-  //     //return false
-  //   } else {
-  //     //return true
-  //   }
-  // }
+  if (paymentType[1].selected) {
+    let validPayment = validCreditCard();
+    if (!validPayment) {
+      e.preventDefault();
+    }
+  }
 
 });
